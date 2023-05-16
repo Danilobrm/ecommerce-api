@@ -6,3 +6,30 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Customer {
+  id         Int    @id @default(autoincrement())
+  name       String
+  email      String
+  password   String
+  addresses Address[]
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("customers")
+}
+
+model Address {
+  id          Int     @id @default(autoincrement())
+  street      String
+  number      String
+  complement  String?
+  district    String
+  city        String
+  state       String
+  postal_code String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  customerId  Int
+
+  @@map("adresses")
+}
