@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { CreateCustomerController } from './controllers/customer/createCustomerController';
-import { Validate } from './middlewares/validate';
+import { CreateCustomer } from './controllers/customer/createCustomer';
+import { ValidateUser } from './middlewares/validate';
 
 const router = Router();
 
 router.post(
   '/register',
-  new Validate().validate,
-  new CreateCustomerController().create,
+  new ValidateUser().validate,
+  new CreateCustomer().create,
 );
 
 export { router };

@@ -1,57 +1,102 @@
-class CreateCustomerControllerMock {
-  create(req, res) {
+import { hash } from 'bcryptjs';
+import {
+  ICreateCustomer,
+  ICustomerData,
+  ICustomerSelectedData,
+} from '../../interfaces/customer';
+import prismaClient from '../../prisma';
+import { Request, Response } from 'express';
+import { prismaMock } from '../../singleton';
+import {
+  IRepository,
+  ModelInputs,
+  ModelSelect,
+} from '../../interfaces/repository';
+
+class CreateCustomer implements ICreateCustomer {
+  async create(req: Request, res: Response): Promise<Response> {
     const { name, email, password } = req.body;
 
-    const customerService = new CreateCustomerServiceMock();
+    const createCustomerService = new Repository();
 
-    const customer = customerService.execute({
+    const userData: ICustomerData = {
       name,
       email,
-      password,
+      password: await hash(password, 8),
+    };
+
+    const select: ModelSelect['customer'] = {
+      id: true,
+      name: true,
+      email: true,
+    };
+
+    const customer = await createCustomerService.create(
+      'customer',
+      userData,
+      select,
+    );
+
+    return res.json(customer);
+  }
+}
+
+class Repository implements IRepository {
+  async create<T extends 'customer'>(
+    tableName: T,
+    data: ModelInputs[T],
+    select: ModelSelect[T],
+  ): Promise<ICustomerSelectedData> {
+    await prismaClient[tableName].create({
+      data: data,
+      select: select,
     });
 
-    return JSON.stringify(customer);
-  }
-}
-
-class CreateCustomerServiceMock {
-  execute({ name, email, password }) {
-    const customer = {
+    return {
       id: 1,
-      email: email,
-      name: name,
+      name: data.name,
+      email: data.email,
     };
-    return customer;
   }
 }
 
-const createCustomer = () => {
-  const req = {
-    body: {
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      password: '12345678',
-    },
-  };
-  const res = {
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn(),
-  };
+const mockRequest = {
+  body: {
+    name: 'test',
+    email: 'test@example.com',
+    password: '12345678',
+  },
+} as unknown as Request;
 
-  return new CreateCustomerControllerMock().create(req, res);
+const mockResponse = {} as unknown as Response;
+mockResponse.json = (data: Request): Response =>
+  JSON.stringify(data) as unknown as Response;
+
+const createSut = () => {
+  return new CreateCustomer();
 };
 
-afterEach(() => jest.clearAllMocks());
+const mockDate = new Date() as Date;
 
-describe('customer', () => {
-  it('creates a new customerr', async () => {
-    const sut = await createCustomer();
+describe('customer create account', () => {
+  const sut = createSut();
+  it('should return a customer created json', async () => {
+    const mockResolvedUser = {
+      id: 1,
+      name: 'test',
+      email: 'test@example.com',
+      password: '12345678',
+      created_at: mockDate,
+      updated_at: mockDate,
+    };
 
-    expect(sut).toStrictEqual(
+    prismaMock.customer.create.mockResolvedValue(mockResolvedUser);
+
+    await expect(sut.create(mockRequest, mockResponse)).resolves.toEqual(
       JSON.stringify({
         id: 1,
-        email: 'john.doe@example.com',
-        name: 'John Doe',
+        name: 'test',
+        email: 'test@example.com',
       }),
     );
   });

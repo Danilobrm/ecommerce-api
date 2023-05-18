@@ -1,82 +1,61 @@
 import { NextFunction, Request, Response } from 'express';
+import { Errors, Validator } from '../interfaces/validate';
+import isEmail from 'validator/lib/isEmail';
 import prismaClient from '../prisma';
-import { isEmail } from 'validator';
 
-type Errors = ErrorMessage[];
-type ErrorMessage = string[];
-
-export class Validate {
-  async validate(req: Request, res: Response, next: NextFunction) {
-    const errors: Errors = [];
+export class ValidateUser {
+  async validate(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<Response | void> {
     const { name, email, password } = req.body;
-    const validateName = new ValidateName().validate(name);
-    errors.push(validateName);
 
-    const validateEmail = await new ValidateEmail().validate(email);
-    errors.push(validateEmail);
+    const emailValidator: Validator<
+      string,
+      Promise<string[]>
+    > = new EmailValidator();
 
-    const validatePassword = new ValidatePassword().validate(password);
-    errors.push(validatePassword);
+    // create class to validate
+    const passwordValidator: Validator<string, string[]> =
+      new PasswordValidator();
+    const nameValidator: Validator<string, string[]> = new NameValidator();
 
-    for (const error of errors) {
-      if (error) {
-        if (error.length > 0) {
-          return res.json(errors.filter((error) => error));
-        }
-      }
+    // validate data
+    const nameErrors = await emailValidator.validate(email);
+    const emailErrors = nameValidator.validate(name);
+    const passwordErrors = passwordValidator.validate(password);
+
+    //get the returned list of erros
+    const errors: Errors = {
+      nameErrors: nameErrors,
+      emailErrors: emailErrors,
+      passwordErros: passwordErrors,
+    };
+
+    // look for errors in lists
+    for (const error in errors) {
+      if (errors[error as keyof Errors].length > 0) return res.json(errors);
     }
-
-    next();
+    return next();
   }
 }
-
-class ValidateName {
-  nameErrors: ErrorMessage = [];
-  validate(name) {
-    if (!name) {
-      this.nameErrors.push('insira um nome.');
-    }
-
-    if (this.nameErrors.length > 0) {
-      return this.nameErrors;
-    }
-
-    return;
-  }
-}
-
-class ValidatePassword {
-  passwordErrors: ErrorMessage = [];
-  validate(password) {
-    if (!password) {
-      this.passwordErrors.push('insira uma senha.');
-      return this.passwordErrors;
-    }
-
-    if (password.length < 6) {
-      this.passwordErrors.push('senha precisa ser maior que 5 caracteres.');
-    }
-
-    if (this.passwordErrors.length > 0) {
-      return this.passwordErrors;
-    }
-
-    return;
-  }
-}
-
-class ValidateEmail {
-  emailErrors: ErrorMessage = [];
-  async validate(email) {
+class EmailValidator implements Validator<string, Promise<string[]>> {
+  emailErros: string[] = [];
+  async validate(email: string): Promise<string[]> {
+    // empty field
     if (!email) {
-      this.emailErrors.push('insira um email.');
-      return this.emailErrors;
+      this.emailErros.push('campo email não pode ficar vazio.');
+      return this.emailErros;
     }
+    if (!isEmail(email)) this.emailErros.push('email inválido.');
 
-    if (!isEmail(email)) {
-      this.emailErrors.push('email incorreto.');
-    }
-    // verificar se email já está cadastrado
+    await this.checkForEmailOnDatabase(email);
+
+    return this.emailErros;
+  }
+
+  async checkForEmailOnDatabase(email: string): Promise<void> {
     const userAlreadyExists = await prismaClient.customer.findFirst({
       where: {
         email: email,
@@ -84,13 +63,28 @@ class ValidateEmail {
     });
 
     if (userAlreadyExists) {
-      this.emailErrors.push('O email informado já está cadastrado.');
+      this.emailErros.push('o email informado já está em uso.');
     }
+  }
+}
 
-    if (this.emailErrors.length > 0) {
-      return this.emailErrors;
+class PasswordValidator implements Validator<string, string[]> {
+  passwordErros: string[] = [];
+  validate(password: string): string[] {
+    if (!password) {
+      this.passwordErros.push('campo senha não pode ficar vazio.');
+      return this.passwordErros;
     }
+    if (password.length < 6)
+      this.passwordErros.push('senha precisa ser maior que 6 caracteres.');
+    return this.passwordErros;
+  }
+}
 
-    return;
+class NameValidator implements Validator<string, string[]> {
+  nameErros: string[] = [];
+  validate(name: string): string[] {
+    if (!name) this.nameErros.push('campo nome não pode ficar vazio.');
+    return this.nameErros;
   }
 }
