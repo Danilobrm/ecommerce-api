@@ -1,30 +1,17 @@
-export interface ICustomer {
+import { Request, Response } from 'express';
+
+export interface ICreateCustomer {
+  create(req: Request, res: Response): Promise<Response>;
+}
+
+export interface ICustomerData {
   name: string;
   email: string;
   password: string;
 }
 
-export interface ICreateCustomerController {
-  create: (req: Request, res: Response) => Response;
+export interface ICustomerSelectedData {
+  id: number;
+  name: string;
+  email: string;
 }
-
-export interface ICreateCustomerService {
-  execute: ({ name, email, password }: ICustomer) => Promise<{
-    name: string;
-    email: string;
-    id: number;
-  }>;
-}
-
-type Request = {
-  body: {
-    name: string;
-    email: string;
-    password: string;
-  };
-};
-
-type Response = {
-  status: jest.Mock<any, any, any>;
-  json: jest.Mock<any, any, any>;
-};
