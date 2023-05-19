@@ -6,7 +6,7 @@ export interface IRepository {
     tableName: T,
     data: ModelInputs[T],
     select: ModelSelect[T],
-  ): Promise<ICustomerSelectedData>;
+  ): Promise<ModelSelectReturn[T]>;
 }
 
 export interface ModelNames {
@@ -20,4 +20,8 @@ export interface ModelInputs {
 
 export interface ModelSelect {
   customer: Prisma.CustomerSelect;
+}
+
+export interface ModelSelectReturn {
+  customer: ICustomerSelectedData;
 }

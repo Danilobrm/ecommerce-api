@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ICreateCustomer } from '../../interfaces/customer';
-import { Repository } from '../../services/customer/repositoryService';
+import { Repository } from '../../services/repository';
 import { ModelSelect } from '../../interfaces/repository';
 import { ICustomerData } from '../../interfaces/customer';
 import { hash } from 'bcryptjs';
