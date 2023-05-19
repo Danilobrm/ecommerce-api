@@ -1,62 +1,19 @@
-import { hash } from 'bcryptjs';
-import {
-  ICreateCustomer,
-  ICustomerData,
-  ICustomerSelectedData,
-} from '../../interfaces/customer';
-import prismaClient from '../../prisma';
 import { Request, Response } from 'express';
+import { mockDate } from '../services/customer/mockRepository';
+import { ICreateCustomer } from '../../interfaces/customer';
 import { prismaMock } from '../../singleton';
-import {
-  IRepository,
-  ModelInputs,
-  ModelSelect,
-} from '../../interfaces/repository';
 
 class CreateCustomer implements ICreateCustomer {
   async create(req: Request, res: Response): Promise<Response> {
     const { name, email, password } = req.body;
 
-    const createCustomerService = new Repository();
-
-    const userData: ICustomerData = {
-      name,
-      email,
-      password: await hash(password, 8),
+    const customer = {
+      id: 1,
+      name: name,
+      email: email,
     };
-
-    const select: ModelSelect['customer'] = {
-      id: true,
-      name: true,
-      email: true,
-    };
-
-    const customer = await createCustomerService.create(
-      'customer',
-      userData,
-      select,
-    );
 
     return res.json(customer);
-  }
-}
-
-class Repository implements IRepository {
-  async create<T extends 'customer'>(
-    tableName: T,
-    data: ModelInputs[T],
-    select: ModelSelect[T],
-  ): Promise<ICustomerSelectedData> {
-    await prismaClient[tableName].create({
-      data: data,
-      select: select,
-    });
-
-    return {
-      id: 1,
-      name: data.name,
-      email: data.email,
-    };
   }
 }
 
@@ -75,8 +32,6 @@ mockResponse.json = (data: Request): Response =>
 const createSut = () => {
   return new CreateCustomer();
 };
-
-const mockDate = new Date() as Date;
 
 describe('customer create account', () => {
   const sut = createSut();
