@@ -1,67 +1,60 @@
-import { ICustomerSelectedData } from '../../interfaces/customer';
 import {
   IRepository,
   ModelInputs,
   ModelSelect,
+  ModelSelectReturn,
 } from '../../interfaces/repository';
 import prismaClient from '../../prisma';
 import { prismaMock } from '../../singleton';
+import { mockDate, mockData, mockSelect, mockResolvedUser } from './mockData';
 
-class Repository implements IRepository {
+export class MockRepository implements IRepository {
   async create<T extends keyof ModelInputs>(
     tableName: T,
     data: ModelInputs[T],
     select: ModelSelect[T],
-  ): Promise<ICustomerSelectedData> {
-    const response = await prismaClient[tableName].create({
+  ): Promise<ModelSelectReturn[T]> {
+    const response = (await prismaClient[tableName].create({
       data: data,
       select: select,
-    });
+    })) as ModelSelectReturn[T];
 
-    return response as ICustomerSelectedData;
+    return response;
   }
 }
 
-const select: ModelSelect['customer'] = {
-  id: true,
-  name: true,
-  email: true,
-};
-
-const createSut = () => {
-  return new Repository();
-};
-
-const mockDate = new Date() as Date;
-
-const mockdata = {
-  name: 'test',
-  email: 'test@example.com',
-  password: '12345678',
+export const createSut = () => {
+  return new MockRepository();
 };
 
 describe('test database repository', () => {
+  const sut = createSut();
+
+  it('check if the functions was called with its params', async () => {
+    const spyRepository = jest.spyOn(sut, 'create');
+
+    await sut.create('customer', mockData, mockSelect);
+
+    expect(spyRepository).toBeCalledTimes(1);
+    expect(spyRepository).toHaveBeenCalledWith(
+      'customer',
+      mockData,
+      mockSelect,
+    );
+  });
+
   it('should create user', async () => {
-    const sut = createSut();
-
-    const mockResolvedUser = {
-      id: 1,
-      name: 'test',
-      email: 'test@example.com',
-      password: '12345678',
-      created_at: mockDate,
-      updated_at: mockDate,
-    };
-
     prismaMock.customer.create.mockResolvedValue(mockResolvedUser);
 
-    await expect(sut.create('customer', mockdata, select)).resolves.toEqual({
-      id: 1,
-      name: 'test',
-      email: 'test@example.com',
-      password: '12345678',
-      created_at: mockDate,
-      updated_at: mockDate,
-    });
+    await expect(sut.create('customer', mockData, mockSelect)).resolves.toEqual(
+      {
+        id: 1,
+        name: 'test',
+        email: 'test@example.com',
+        password: '12345678',
+        created_at: mockDate,
+        updated_at: mockDate,
+      },
+    );
   });
 });
