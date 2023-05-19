@@ -23,6 +23,6 @@ app.use((err: Error, req: Request, res: Response) => {
   });
 });
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log('Servidor online');
 });
