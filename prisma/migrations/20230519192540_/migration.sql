@@ -11,7 +11,7 @@ CREATE TABLE `customers` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `adresses` (
+CREATE TABLE `addresses` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `street` VARCHAR(191) NOT NULL,
     `number` VARCHAR(191) NOT NULL,
@@ -20,10 +20,10 @@ CREATE TABLE `adresses` (
     `city` VARCHAR(191) NOT NULL,
     `state` VARCHAR(191) NOT NULL,
     `postal_code` VARCHAR(191) NOT NULL,
-    `customerId` INTEGER NOT NULL,
+    `customer_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `adresses` ADD CONSTRAINT `adresses_customerId_fkey` FOREIGN KEY (`customerId`) REFERENCES `customers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `addresses` ADD CONSTRAINT `addresses_customer_id_fkey` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

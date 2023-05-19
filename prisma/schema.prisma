@@ -8,19 +8,19 @@ datasource db {
 }
 
 model Customer {
-  id         Int    @id @default(autoincrement())
+  id         Int  @id @default(autoincrement())
   name       String
   email      String
   password   String
-  addresses Address[]
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
   @@map("customers")
+  addresses Address[]
 }
 
 model Address {
-  id          Int     @id @default(autoincrement())
+  id          Int @id @default(autoincrement())
   street      String
   number      String
   complement  String?
@@ -28,8 +28,9 @@ model Address {
   city        String
   state       String
   postal_code String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  customerId  Int
 
-  @@map("adresses")
+  customer  Customer @relation(fields: [customer_id], references: [id])
+
+  @@map("addresses")
+  customer_id  Int
 }
