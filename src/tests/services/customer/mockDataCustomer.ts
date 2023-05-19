@@ -1,4 +1,4 @@
-import { ModelSelect } from '../../interfaces/repository';
+import { ModelSelect } from '../../../interfaces/repository';
 
 export const mockSelect: ModelSelect['customer'] = {
   id: true,
