@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Request, Response, Router } from 'express';
 import { CreateCustomer } from './controllers/customer/createCustomer';
 import { CreateAddress } from './controllers/address/createAddress';
@@ -26,4 +27,10 @@ router.get('/customers', async (req: Request, res: Response) => {
 
 router.post('/address', new CreateAddress().create);
 
+=======
+import { Router } from 'express';
+
+const router = Router();
+
+>>>>>>> 7653a60 (API endpoints routes initial file config)
 export { router };
