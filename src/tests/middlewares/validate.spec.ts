@@ -1,13 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Errors, Validator } from '../../interfaces/validate';
-
-class EmailValidator implements Validator<string, Promise<string[]>> {
-  emailErros: string[] = [];
-  async validate(email: string): Promise<string[]> {
-    if (!email) this.emailErros.push('erro');
-    return this.emailErros;
-  }
-}
+import { ValidationError, Validator } from '../../interfaces/validate';
 
 class PasswordValidator implements Validator<string, string[]> {
   passwordErros: string[] = [];
@@ -26,31 +18,29 @@ class NameValidator implements Validator<string, string[]> {
 }
 
 class ValidateUser {
-  async validate(
+  errors: Record<string, ValidationError> = {};
+  async userValidate(
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<Errors | void> {
-    const { name, email, password } = req.body;
+  ): Promise<Record<string, ValidationError> | void> {
+    const { email } = req.body;
 
-    const emailValidator: Validator<
-      string,
-      Promise<string[]>
-    > = new EmailValidator();
-    const passwordValidator: Validator<string, string[]> =
-      new PasswordValidator();
-    const nameValidator: Validator<string, string[]> = new NameValidator();
+    const validateEmail = new EmailValidator();
+    const emailErrors = validateEmail.validate(email);
 
-    const errors: Errors = {
-      emailErrors: await emailValidator.validate(email),
-      nameErrors: nameValidator.validate(name),
-      passwordErros: passwordValidator.validate(password),
-    };
-
-    for (const error in errors) {
-      if (errors[error as keyof Errors].length > 0) return errors;
+    if (emailErrors) {
+      this.errors.email = { message: emailErrors };
+      return this.errors;
     }
+
     next();
+  }
+}
+
+class EmailValidator implements Validator<string, string | void> {
+  validate(email: string): string | void {
+    if (!email) return 'erro';
   }
 }
 
@@ -71,17 +61,17 @@ const mockResponse = jest.fn() as unknown as Response;
 
 describe('test data validator', () => {
   const sut = createSut();
-  const spyValidate = jest.spyOn(sut, 'validate');
+  const spyValidate = jest.spyOn(sut, 'userValidate');
 
   it('should call validate method once', () => {
-    sut.validate(mockRequest, mockResponse, mockNext);
+    sut.userValidate(mockRequest, mockResponse, mockNext);
 
     expect(spyValidate).toHaveBeenCalledTimes(1);
   });
 
   it('should call next() if no errors is given', async () => {
     expect(
-      await sut.validate(mockRequest, mockResponse, mockNext),
+      await sut.userValidate(mockRequest, mockResponse, mockNext),
     ).toBeUndefined();
   });
 
@@ -91,10 +81,10 @@ describe('test data validator', () => {
       email: '',
       password: '',
     };
-    expect(await sut.validate(mockRequest, mockResponse, mockNext)).toEqual({
-      emailErrors: ['erro'],
-      nameErrors: ['erro'],
-      passwordErros: ['erro'],
-    });
+    expect(await sut.userValidate(mockRequest, mockResponse, mockNext)).toEqual(
+      {
+        email: { message: 'erro' },
+      },
+    );
   });
 });
