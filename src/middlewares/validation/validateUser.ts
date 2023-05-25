@@ -44,8 +44,8 @@ export class ValidateUserRegister {
       errors.passwordErrors = passwordErrors;
     }
 
-    for (const error in errors) {
-      if (errors[error as keyof Errors]) {
+    for (const field in errors) {
+      if (errors[field as keyof Errors]) {
         return res.status(400).json(errors);
       }
     }
