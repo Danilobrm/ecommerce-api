@@ -1,4 +1,4 @@
-import { Validator } from '../../interfaces/validate';
+import { Validator } from '../../interfaces/validate/validate';
 
 export class NameValidator implements Validator<string, string> {
   validate(name: string): string {

@@ -1,7 +1,7 @@
-import { Errors, Validator } from '../../interfaces/validate';
-import { PasswordValidator } from './passwordValidator';
-import { NameValidator } from './nameValidator';
-import { EmailValidator } from './emailValidator';
+import { Errors, Validator } from '../../interfaces/validate/validate';
+import { PasswordValidator } from './fields/passwordValidator';
+import { NameValidator } from './fields/nameValidator';
+import { EmailValidator } from './fields/emailValidator';
 import { NextFunction, Request, Response } from 'express';
 
 export class ValidateUserRegister {
