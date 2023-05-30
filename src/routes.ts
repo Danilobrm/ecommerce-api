@@ -1,29 +1,16 @@
-import { Request, Response, Router } from 'express';
-import { CreateCustomer } from './controllers/customer/createCustomer';
-import { CreateAddress } from './controllers/address/createAddress';
-import prismaClient from './prisma';
+import { Router } from 'express';
 import { ValidateUserRegister } from './middlewares/validation/validateUser';
+import { CreateAddressController } from './controllers/address/CreateAddressController';
+import { CreateUserController } from './controllers/customer/CreateUserController';
 
 const router = Router();
 
 router.post(
   '/register',
   new ValidateUserRegister().validate,
-  new CreateCustomer().create,
+  new CreateUserController().create,
 );
 
-router.get('/customers', async (req: Request, res: Response) => {
-  const users = await prismaClient.customer.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-    },
-  });
-
-  return res.json(users);
-});
-
-router.post('/address', new CreateAddress().create);
+router.post('/address', new CreateAddressController().create);
 
 export { router };

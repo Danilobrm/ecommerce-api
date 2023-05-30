@@ -1,19 +1,16 @@
 import { Request, Response } from 'express';
-import { ICreateAddress } from '../../interfaces/address';
-import {
-  MockRepository,
-  mockResolvedAddress,
-} from '../services/address/mockRepository';
-import { Prisma } from '@prisma/client';
-import { prismaMock } from '../../singleton';
+import { prismaMock } from '../../../../singleton';
+import { CreateRequest } from '../../../../interfaces/controllers/CRUD';
+import { MockCreateAddressService } from '../../../services/address/addressRepository.spec';
 
-class CreateAddress implements ICreateAddress {
+class CreateAddress implements CreateRequest {
   async create(req: Request, res: Response): Promise<Response> {
     const { street, number, district, city, state, postal_code, customer_id } =
       req.body;
-    const createAddressRepository = new MockRepository();
 
-    const mockAddressData: Prisma.AddressCreateInput = {
+    const createAddressRepository = new MockCreateAddressService();
+
+    const address = await createAddressRepository.create({
       street: street,
       number: number,
       district: district,
@@ -21,23 +18,7 @@ class CreateAddress implements ICreateAddress {
       state: state,
       postal_code: postal_code,
       customer: { connect: { id: customer_id } },
-    };
-
-    const mockSelect: Prisma.AddressSelect = {
-      id: true,
-      street: true,
-      number: true,
-      district: true,
-      city: true,
-      state: true,
-      postal_code: true,
-      customer_id: true,
-    };
-
-    const address = await createAddressRepository.create(
-      mockAddressData,
-      mockSelect,
-    );
+    });
 
     return res.json(address);
   }
@@ -85,3 +66,15 @@ describe('customer create address', () => {
     );
   });
 });
+
+const mockResolvedAddress = {
+  id: 1,
+  complement: '',
+  street: 'rua 8',
+  number: 'SN',
+  city: 'luziânia',
+  district: 'Parque estrela dalva VII',
+  postal_code: '72830080',
+  state: 'Goiás',
+  customer_id: 1,
+};
