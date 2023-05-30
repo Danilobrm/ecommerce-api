@@ -38,7 +38,7 @@ describe('test create customer on database', () => {
     prismaMock.address.create.mockResolvedValue(mockResolvedAddress);
 
     await expect(sut.create(mockData)).resolves.toEqual({
-      id: 1,
+      id: '1',
       complement: '',
       street: 'rua 8',
       number: 'SN',
@@ -46,7 +46,7 @@ describe('test create customer on database', () => {
       district: 'Parque estrela dalva VII',
       postal_code: '72830080',
       state: 'Goiás',
-      customer_id: 1,
+      customer_id: '1',
     });
   });
 });
@@ -58,11 +58,11 @@ const mockData: IAddressCreateData = {
   district: 'Parque estrela dalva VII',
   postal_code: '72830080',
   state: 'Goiás',
-  customer: { connect: { id: 1 } },
+  customer: { connect: { id: '1' } },
 };
 
 const mockResolvedAddress = {
-  id: 1,
+  id: '1',
   complement: '',
   street: 'rua 8',
   number: 'SN',
@@ -70,5 +70,5 @@ const mockResolvedAddress = {
   district: 'Parque estrela dalva VII',
   postal_code: '72830080',
   state: 'Goiás',
-  customer_id: 1,
+  customer_id: '1',
 };

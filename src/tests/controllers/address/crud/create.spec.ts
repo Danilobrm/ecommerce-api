@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { prismaMock } from '../../../../singleton';
 import { CreateRequest } from '../../../../interfaces/controllers/CRUD';
-import { MockCreateAddressService } from '../../../services/address/addressRepository.spec';
+import { MockCreateAddressService } from '../../../services/address/createAddressService.spec';
 
 class CreateAddress implements CreateRequest {
   async create(req: Request, res: Response): Promise<Response> {
@@ -26,7 +26,7 @@ class CreateAddress implements CreateRequest {
 
 const mockRequest = {
   body: {
-    id: 1,
+    id: '1',
     complement: '',
     street: 'rua 8',
     number: 'SN',
@@ -53,7 +53,7 @@ describe('customer create address', () => {
 
     await expect(sut.create(mockRequest, mockResponse)).resolves.toEqual(
       JSON.stringify({
-        id: 1,
+        id: '1',
         complement: '',
         street: 'rua 8',
         number: 'SN',
@@ -61,14 +61,14 @@ describe('customer create address', () => {
         district: 'Parque estrela dalva VII',
         postal_code: '72830080',
         state: 'Goiás',
-        customer_id: 1,
+        customer_id: '1',
       }),
     );
   });
 });
 
 const mockResolvedAddress = {
-  id: 1,
+  id: '1',
   complement: '',
   street: 'rua 8',
   number: 'SN',
@@ -76,5 +76,5 @@ const mockResolvedAddress = {
   district: 'Parque estrela dalva VII',
   postal_code: '72830080',
   state: 'Goiás',
-  customer_id: 1,
+  customer_id: '1',
 };

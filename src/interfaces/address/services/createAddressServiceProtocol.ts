@@ -10,7 +10,7 @@ export interface IAddressCreateData {
 }
 
 interface Customer {
-  connect: { id: number };
+  connect: { id: string };
 }
 
 export interface IAddressSelectedData {
@@ -20,7 +20,7 @@ export interface IAddressSelectedData {
   district: string;
   postal_code: string;
   state: string;
-  customer_id: number;
+  customer_id: string;
 }
 
 export interface ICreateAddressService {
