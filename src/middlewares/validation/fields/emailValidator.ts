@@ -1,6 +1,6 @@
 import isEmail from 'validator/lib/isEmail';
-import { Validator } from '../../interfaces/validate';
-import prismaClient from '../../prisma';
+import { Validator } from '../../../interfaces/validate/validate';
+import prismaClient from '../../../prisma';
 
 export class EmailValidator implements Validator<string, Promise<string>> {
   async validate(email: string): Promise<string> {
