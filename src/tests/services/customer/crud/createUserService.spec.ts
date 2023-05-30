@@ -40,7 +40,7 @@ describe('test create customer on database', () => {
     prismaMock.customer.create.mockResolvedValue(mockResolvedUser);
 
     await expect(sut.create(mockData)).resolves.toEqual({
-      id: 1,
+      id: '1',
       name: 'test',
       email: 'test@example.com',
       password: '12345678',
@@ -60,7 +60,7 @@ export const mockData: IUserCreateData = {
 // resolved data
 export const mockDate = new Date() as Date;
 export const mockResolvedUser = {
-  id: 1,
+  id: '1',
   name: 'test',
   email: 'test@example.com',
   password: '12345678',

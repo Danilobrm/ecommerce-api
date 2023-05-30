@@ -5,14 +5,14 @@ class MockAuthenticateCustomer implements AuthenticateRequest {
   async authenticate(req: Request, res: Response): Promise<Response> {
     const { email, password } = req.body;
 
-    const user = {
+    const auth = {
       id: 1,
       name: 'danilo',
       email: email,
       token: 'token',
     };
 
-    return res.json(user);
+    return res.json(auth);
   }
 }
 

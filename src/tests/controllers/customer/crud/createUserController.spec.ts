@@ -7,7 +7,7 @@ class CreateUserController implements CreateRequest {
     const { name, email, password } = req.body;
 
     const customer = {
-      id: 1,
+      id: '1',
       name: name,
       email: email,
     };
@@ -44,7 +44,7 @@ describe('customer create account', () => {
 
   it('should return a customer created json', async () => {
     const mockResolvedUser = {
-      id: 1,
+      id: '1',
       name: 'test',
       email: 'test@example.com',
       password: '12345678',
@@ -56,7 +56,7 @@ describe('customer create account', () => {
 
     await expect(sut.create(mockRequest, mockResponse)).resolves.toEqual(
       JSON.stringify({
-        id: 1,
+        id: '1',
         name: 'test',
         email: 'test@example.com',
       }),

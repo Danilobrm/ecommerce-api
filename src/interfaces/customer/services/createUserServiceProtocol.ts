@@ -5,7 +5,7 @@ export interface IUserCreateData {
 }
 
 export interface IUserSelectedData {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }
