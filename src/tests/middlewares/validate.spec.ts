@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { Errors, Validator } from '../../interfaces/validate/validate';
+import { Validator } from '../../interfaces/validate/validate';
 
 class EmailValidator implements Validator<string, Promise<string>> {
   emailErros: string[] = [];
@@ -24,6 +24,10 @@ class NameValidator implements Validator<string, string> {
   }
 }
 
+const nameValidator = new NameValidator();
+const emailValidator = new EmailValidator();
+const passwordValidator = new PasswordValidator();
+
 class ValidateUser {
   async validate(
     req: Request,
@@ -31,14 +35,6 @@ class ValidateUser {
     next: NextFunction,
   ): Promise<void | Response> {
     const { name, email, password } = req.body;
-    // create class to validate
-    const emailValidator: Validator<
-      string,
-      Promise<string>
-    > = new EmailValidator();
-    const passwordValidator: Validator<string, string> =
-      new PasswordValidator();
-    const nameValidator: Validator<string, string> = new NameValidator();
 
     // validate data
     const nameErrors = nameValidator.validate(name);
@@ -46,29 +42,24 @@ class ValidateUser {
     const passwordErrors = passwordValidator.validate(password);
 
     //get the returned list of erros
-    const errors: Errors = {
-      nameErrors: '',
-      emailErrors: '',
-      passwordErrors: '',
-    };
+    const validationErrors: { [key: string]: string } = {};
 
     if (nameErrors) {
-      errors.nameErrors = nameErrors;
+      validationErrors.name = nameErrors;
     }
 
     if (emailErrors) {
-      errors.emailErrors = emailErrors;
+      validationErrors.email = emailErrors;
     }
 
     if (passwordErrors) {
-      errors.passwordErrors = passwordErrors;
+      validationErrors.password = passwordErrors;
     }
 
-    for (const field in errors) {
-      if (errors[field as keyof Errors]) {
-        return res.status(400).json(errors);
-      }
+    if (Object.keys(validationErrors).length > 0) {
+      return res.status(400).json(validationErrors);
     }
+
     return next();
   }
 }
