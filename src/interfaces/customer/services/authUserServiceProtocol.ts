@@ -4,12 +4,15 @@ export interface IUserAuthData {
 }
 
 export interface IUserAuthReturn {
-  id: number;
+  id: string;
   name: string;
   email: string;
   token: string;
 }
 
-export interface AuthUserService {
-  authenticate({ email, password }: IUserAuthData): Promise<IUserAuthReturn>;
+export interface IAuthUserService {
+  authenticate({
+    email,
+    password,
+  }: IUserAuthData): Promise<IUserAuthReturn | void>;
 }
