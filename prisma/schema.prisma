@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Customer {
-  id         Int  @id @default(autoincrement())
+  id         String    @id @default(uuid())
   name       String
   email      String
   password   String
@@ -20,7 +20,7 @@ model Customer {
 }
 
 model Address {
-  id          Int @id @default(autoincrement())
+  id          String    @id @default(uuid())
   street      String
   number      String
   complement  String?
@@ -32,5 +32,5 @@ model Address {
   customer  Customer @relation(fields: [customer_id], references: [id])
 
   @@map("addresses")
-  customer_id  Int
+  customer_id  String
 }
