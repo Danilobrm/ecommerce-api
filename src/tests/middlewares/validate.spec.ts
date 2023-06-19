@@ -28,7 +28,7 @@ const nameValidator = new NameValidator();
 const emailValidator = new EmailValidator();
 const passwordValidator = new PasswordValidator();
 
-class ValidateUser {
+class ValidateUserRegister {
   async validate(
     req: Request,
     res: Response,
@@ -57,27 +57,19 @@ class ValidateUser {
     }
 
     if (Object.keys(validationErrors).length > 0) {
-      return res.status(400).json(validationErrors);
+      return {
+        status: res.status(400),
+        data: res.json(validationErrors),
+      } as unknown as Response;
     }
 
-    return next();
+    return next() as undefined;
   }
 }
 
 const createSut = () => {
-  return new ValidateUser();
+  return new ValidateUserRegister();
 };
-
-const mockRequest = {
-  body: {
-    name: 'test',
-    email: 'test@example.com',
-    password: '12345678',
-  },
-} as unknown as Request;
-
-const mockNext = () => jest.fn();
-const mockResponse = jest.fn() as unknown as Response;
 
 describe('test data validator', () => {
   const sut = createSut();
@@ -89,22 +81,39 @@ describe('test data validator', () => {
     expect(spyValidate).toHaveBeenCalledTimes(1);
   });
 
-  // it('should call next() if no errors is given', async () => {
-  //   expect(
-  //     await sut.validate(mockRequest, mockResponse, mockNext),
-  //   ).toBeUndefined();
-  // });
+  it('should call next() if no errors is given', async () => {
+    const validate = await sut.validate(mockRequest, mockResponse, mockNext);
 
-  // it('should return error if no data was provided', async () => {
-  //   mockRequest.body = {
-  //     name: '',
-  //     email: '',
-  //     password: '',
-  //   };
-  //   expect(await sut.validate(mockRequest, mockResponse, mockNext)).toEqual({
-  //     emailErrors: ['erro'],
-  //     nameErrors: ['erro'],
-  //     passwordErros: ['erro'],
-  //   });
-  // });
+    expect(validate).toEqual(undefined);
+  });
+
+  it('should return error if no data was provided', async () => {
+    mockRequest.body = {
+      name: '',
+      email: '',
+      password: '',
+    };
+    expect(await sut.validate(mockRequest, mockResponse, mockNext)).toEqual({
+      data: JSON.stringify({
+        name: 'erro',
+        email: 'erro',
+        password: 'erro',
+      }),
+      status: 400,
+    });
+  });
 });
+
+const mockRequest = {
+  body: {
+    name: 'test',
+    email: 'test@example.com',
+    password: '12345678',
+  },
+} as unknown as Request;
+
+const mockNext = () => undefined as unknown as NextFunction;
+const mockResponse = {
+  status: (num: number) => num,
+  json: (data: { [key: string]: string }) => JSON.stringify(data),
+} as unknown as Response;

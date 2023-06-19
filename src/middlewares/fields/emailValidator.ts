@@ -1,7 +1,7 @@
 import isEmail from 'validator/lib/isEmail';
 import { Validator } from '../../interfaces/validate/validate';
 import prismaClient from '../../prisma';
-import { Customer } from '@prisma/client';
+import { User } from '@prisma/client';
 
 export class EmailValidator implements Validator<string, Promise<string>> {
   async validate(email: string): Promise<string> {
@@ -25,8 +25,8 @@ export class EmailValidator implements Validator<string, Promise<string>> {
 }
 
 export class EmailValidatorDatabase {
-  async validate(email: string): Promise<Customer | null> {
-    const userAlreadyExists = await prismaClient.customer.findFirst({
+  async validate(email: string): Promise<User | null> {
+    const userAlreadyExists = await prismaClient.user.findFirst({
       where: {
         email: email,
       },
