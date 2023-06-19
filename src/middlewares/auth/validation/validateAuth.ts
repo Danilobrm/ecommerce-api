@@ -20,7 +20,7 @@ export class ValidateUserAuth {
     const passwordMatch = await compare(password, user.password);
 
     if (!passwordMatch) {
-      validationErrors.password = 'Password incorreto';
+      validationErrors.password = 'Senha incorreta';
       return res.status(400).json(validationErrors);
     }
     next();
