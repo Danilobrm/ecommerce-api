@@ -1,13 +1,9 @@
 import prismaClient from '../../prisma';
 
-import {
-  IAddressCreateData,
-  IAddressSelectedData,
-  ICreateAddressService,
-} from '../../interfaces/address/services/createAddressServiceProtocol';
+import { AddressData } from '../../interfaces/address/services/createAddressServiceProtocol';
 
-export class CreateAddressService implements ICreateAddressService {
-  async create(data: IAddressCreateData): Promise<IAddressSelectedData> {
+export class CreateAddressService {
+  async execute(data: AddressData) {
     const response = await prismaClient.address.create({
       data: data,
       select: {
@@ -17,10 +13,10 @@ export class CreateAddressService implements ICreateAddressService {
         district: true,
         postal_code: true,
         state: true,
-        customer_id: true,
+        user_id: true,
       },
     });
 
-    return response as IAddressSelectedData;
+    return response;
   }
 }
