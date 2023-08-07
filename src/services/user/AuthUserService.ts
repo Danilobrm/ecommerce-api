@@ -1,42 +1,26 @@
-import { compare, hash } from 'bcryptjs';
+import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { emailValidatorDatabase } from '../../middlewares/fields/emailValidator';
 
-interface IUserAuthData {
+interface AuthenticateRequest {
   email: string;
   password: string;
 }
 
 export class AuthUserService {
-  async execute({ email, password }: IUserAuthData) {
+  async authenticate({ email, password }: AuthenticateRequest) {
     const secretOrPrivateKey = process.env.JWT_SECRET;
-    if (!secretOrPrivateKey) {
-      return null;
-    }
+    if (!secretOrPrivateKey) return;
 
     const user = await emailValidatorDatabase.validate(email);
-    if (!user) return null;
+    if (!user) return;
 
     const passwordMatch = await compare(password, user.password);
-    if (!passwordMatch) return null;
+    if (!passwordMatch) return;
 
     // gerar token para o usuario
-    const token = sign(
-      { name: user.name, email: user.email },
-      secretOrPrivateKey,
-      {
-        subject: user.id,
-        expiresIn: '30d',
-      },
-    );
+    const token = sign({ name: user.name, email: user.email }, secretOrPrivateKey, { subject: user.id, expiresIn: '30d' });
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        token: token,
-      },
-    };
+    return { id: user.id, name: user.name, email: user.email, token: token };
   }
 }
