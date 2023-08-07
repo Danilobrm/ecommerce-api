@@ -8,12 +8,7 @@ class MockAddItemController {
     const { cart_id, product_id, amount } = req.body;
 
     const addItem = new MockAddItemService();
-
-    const cart = await addItem.execute({
-      cart_id,
-      product_id,
-      amount,
-    });
+    const cart = await addItem.execute({ cart_id, product_id, amount });
 
     return res.json(cart);
   }
@@ -28,12 +23,9 @@ interface ItemRequest {
 class MockAddItemService {
   async execute({ cart_id, product_id, amount }: ItemRequest) {
     const cart = await prismaClient.item.create({
-      data: {
-        cart_id: cart_id,
-        product_id: product_id,
-        amount: amount,
-      },
+      data: { cart_id: cart_id, product_id: product_id, amount: amount },
     });
+
     return cart;
   }
 }

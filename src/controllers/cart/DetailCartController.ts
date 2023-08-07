@@ -7,9 +7,7 @@ class DetailCartController {
 
     const detailCartService = new DetailCartService();
 
-    const cart = await detailCartService.execute({
-      cart_id,
-    });
+    const cart = await detailCartService.execute({ cart_id });
     return res.json(cart);
   }
 }
