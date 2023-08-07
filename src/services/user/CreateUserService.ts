@@ -1,30 +1,18 @@
 import prismaClient from '../../prisma';
 
-export interface IUserCreateData {
+export interface UserRequest {
   name: string;
   email: string;
   password: string;
 }
 
 export class CreateUserService {
-  async execute({ name, email, password }: IUserCreateData) {
+  async create({ name, email, password }: UserRequest) {
     const response = await prismaClient.user.create({
-      data: {
-        name: name,
-        email: email,
-        password: password,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+      data: { name: name, email: email, password: password },
+      select: { id: true, name: true, email: true },
     });
 
-    return {
-      user: {
-        ...response,
-      },
-    };
+    return response;
   }
 }

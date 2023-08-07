@@ -7,17 +7,13 @@ import { hash } from 'bcryptjs';
 class MockCreateUserController implements CreateRequest {
   async create(req: Request, res: Response): Promise<Response> {
     const { name, email, password } = req.body;
+
     const passwordHash = await hash(password, 8);
 
-    const createUserService = new MockCreateUserService();
+    const createCustomerService = new MockCreateUserService();
+    const customer = await createCustomerService.create({ name, email, password: passwordHash });
 
-    const user = await createUserService.execute({
-      name,
-      email,
-      password: passwordHash,
-    });
-
-    return res.json(user);
+    return res.json(customer);
   }
 }
 
@@ -28,25 +24,13 @@ export interface IUserCreateData {
 }
 
 export class MockCreateUserService {
-  async execute({ name, email, password }: IUserCreateData) {
+  async create({ name, email, password }: IUserCreateData) {
     const response = await prismaClient.user.create({
-      data: {
-        name: name,
-        email: email,
-        password: password,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+      data: { name: name, email: email, password: password },
+      select: { id: true, name: true, email: true },
     });
 
-    return {
-      user: {
-        ...response,
-      },
-    };
+    return response;
   }
 }
 
@@ -72,18 +56,18 @@ describe('user create account', () => {
       password: '12345678',
       created_at: mockDate,
       updated_at: mockDate,
+      cart_id: 'cartid',
     });
 
     await expect(sut.create(mockRequest, mockResponse)).resolves.toEqual(
       JSON.stringify({
-        user: {
-          id: '1',
-          name: 'test',
-          email: 'test@example.com',
-          password: '12345678',
-          created_at: mockDate,
-          updated_at: mockDate,
-        },
+        id: '1',
+        name: 'test',
+        email: 'test@example.com',
+        password: '12345678',
+        created_at: mockDate,
+        updated_at: mockDate,
+        cart_id: 'cartid',
       }),
     );
   });
@@ -100,5 +84,4 @@ const mockRequest = {
 } as unknown as Request;
 
 const mockResponse = {} as unknown as Response;
-mockResponse.json = (data: Request): Response =>
-  JSON.stringify(data) as unknown as Response;
+mockResponse.json = (data: Request): Response => JSON.stringify(data) as unknown as Response;
