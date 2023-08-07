@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Customer {
+model User {
   id         String    @id @default(uuid())
   name       String
   email      String
@@ -15,12 +15,14 @@ model Customer {
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
-  @@map("customers")
   addresses Address[]
+  cart Cart?
+
+  @@map("users")
 }
 
 model Address {
-  id          String    @id @default(uuid())
+  id          String  @id @default(uuid())
   street      String
   number      String
   complement  String?
@@ -29,8 +31,61 @@ model Address {
   state       String
   postal_code String
 
-  customer  Customer @relation(fields: [customer_id], references: [id])
+  user    User @relation(fields: [user_id], references: [id])
+  user_id String
 
   @@map("addresses")
-  customer_id  String
+}
+
+model Category {
+  id         String    @id @default(uuid())
+  name       String
+
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  products   Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String @id @default(uuid())
+  name        String
+  price       String
+  description String
+  banner      String
+
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  category    Category @relation(fields: [category_id], references: [id])
+  category_id String
+  items  Item[]
+
+  @@map("products")
+}
+
+model Cart {
+  id     String  @id @default(uuid())
+  status Boolean @default(false)
+  draft  Boolean @default(true)
+
+  user    User @relation(fields: [user_id], references: [id])
+  items      Item[]
+
+  @@map("cart")
+  user_id String @unique
+}
+
+model Item {
+  id     String @id @default(uuid())
+  amount Int
+
+  cart       Cart   @relation(fields: [cart_id], references: [id])
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@map("items")
+  cart_id    String
+  product_id String
 }
