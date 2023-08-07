@@ -6,9 +6,9 @@ import { prismaMock } from '../../../../singleton';
 class MockCreateCategoryController implements CreateRequest {
   async create(req: Request, res: Response) {
     const { name } = req.body;
+    if (!name) res.status(400).json('Categoria precisa de um nome!');
 
     const createCategoryService = new MockCreateCategoryService();
-
     const category = await createCategoryService.execute({ name });
 
     return res.json(category);
@@ -21,19 +21,7 @@ export interface CategoryRequest {
 
 class MockCreateCategoryService {
   async execute({ name }: CategoryRequest) {
-    if (name === '') {
-      return 'Nome inválido.';
-    }
-
-    const category = await prismaClient.category.create({
-      data: {
-        name: name,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
+    const category = await prismaClient.category.create({ data: { name: name }, select: { id: true, name: true } });
 
     return category;
   }
@@ -77,7 +65,6 @@ const mockRequest = {
 } as unknown as Request;
 
 const mockResponse = {} as unknown as Response;
-mockResponse.json = (data: Request): Response =>
-  JSON.stringify(data) as unknown as Response;
+mockResponse.json = (data: Request): Response => JSON.stringify(data) as unknown as Response;
 
 export const mockDate = new Date() as Date;

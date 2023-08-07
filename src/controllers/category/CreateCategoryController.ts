@@ -5,11 +5,9 @@ import { CreateRequest } from '../../interfaces/controllers/CRUD';
 class CreateCategoryController implements CreateRequest {
   async create(req: Request, res: Response) {
     const { name } = req.body;
-
-    console.log(req.body);
+    if (!name) res.status(400).json('Categoria precisa de um nome!');
 
     const createCategoryService = new CreateCategoryService();
-
     const category = await createCategoryService.execute({ name });
 
     return res.json(category);
