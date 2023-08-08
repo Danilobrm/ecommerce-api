@@ -21,10 +21,6 @@ export class CreateUserService {
       },
     });
 
-    return {
-      user: {
-        ...response,
-      },
-    };
+    return response;
   }
 }

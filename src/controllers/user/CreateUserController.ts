@@ -10,12 +10,7 @@ export class CreateUserController implements CreateRequest {
     const passwordHash = await hash(password, 8);
 
     const createUserService = new CreateUserService();
-
-    const user = await createUserService.execute({
-      name,
-      email,
-      password: passwordHash,
-    });
+    const user = await createUserService.execute({ name, email, password: passwordHash });
 
     return res.json(user);
   }
