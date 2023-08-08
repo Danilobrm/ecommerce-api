@@ -8,22 +8,15 @@ class MockRemoveItemController {
     const item_id = req.query.item_id as string;
 
     const removeItemService = new MockRemoveItemService();
-
-    const item = await removeItemService.execute({
-      item_id,
-    });
-
-    const detailCartService = new MockDetailCartService();
+    const item = await removeItemService.execute({ item_id });
 
     const cart_id = item.cart_id;
-
+    const detailCartService = new MockDetailCartService();
     const cart = await detailCartService.execute({ cart_id });
 
-    if (cart.length > 0) {
-      return res.json(item);
-    }
+    if (cart.length > 0) return res.json(item);
+    req.cart_id = item.cart_id;
 
-    req.cart_id = cart_id;
     next();
   }
 }
@@ -34,11 +27,7 @@ interface ItemRequest {
 
 class MockRemoveItemService {
   async execute({ item_id }: ItemRequest) {
-    const item = await prismaClient.item.delete({
-      where: {
-        id: item_id,
-      },
-    });
+    const item = await prismaClient.item.delete({ where: { id: item_id } });
 
     return item;
   }

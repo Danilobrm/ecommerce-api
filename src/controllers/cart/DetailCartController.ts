@@ -6,10 +6,8 @@ class DetailCartController {
     const cart_id = req.query.cart_id as string;
 
     const detailCartService = new DetailCartService();
+    const cart = await detailCartService.execute({ cart_id });
 
-    const cart = await detailCartService.execute({
-      cart_id,
-    });
     return res.json(cart);
   }
 }

@@ -10,12 +10,7 @@ class MockCreateUserController implements CreateRequest {
     const passwordHash = await hash(password, 8);
 
     const createUserService = new MockCreateUserService();
-
-    const user = await createUserService.execute({
-      name,
-      email,
-      password: passwordHash,
-    });
+    const user = await createUserService.execute({ name, email, password: passwordHash });
 
     return res.json(user);
   }
@@ -42,11 +37,7 @@ export class MockCreateUserService {
       },
     });
 
-    return {
-      user: {
-        ...response,
-      },
-    };
+    return response;
   }
 }
 
@@ -100,5 +91,4 @@ const mockRequest = {
 } as unknown as Request;
 
 const mockResponse = {} as unknown as Response;
-mockResponse.json = (data: Request): Response =>
-  JSON.stringify(data) as unknown as Response;
+mockResponse.json = (data: Request): Response => JSON.stringify(data) as unknown as Response;

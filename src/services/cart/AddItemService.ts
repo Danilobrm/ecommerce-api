@@ -9,12 +9,9 @@ interface ItemRequest {
 class AddItemService {
   async execute({ cart_id, product_id, amount }: ItemRequest) {
     const cart = await prismaClient.item.create({
-      data: {
-        cart_id: cart_id,
-        product_id: product_id,
-        amount: amount,
-      },
+      data: { cart_id: cart_id, product_id: product_id, amount: amount },
     });
+
     return cart;
   }
 }

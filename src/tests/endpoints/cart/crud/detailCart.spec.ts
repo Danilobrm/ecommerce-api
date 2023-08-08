@@ -8,7 +8,6 @@ class MockDetailCartController {
     const cart_id = req.query.cart_id as string;
 
     const detailCartService = new MockDetailCartService();
-
     const cart = await detailCartService.execute({
       cart_id,
     });
@@ -23,15 +22,7 @@ interface DetailRequest {
 
 class MockDetailCartService {
   async execute({ cart_id }: DetailRequest) {
-    const cart = await prismaClient.item.findMany({
-      where: {
-        cart_id: cart_id,
-      },
-      include: {
-        product: true,
-        cart: true,
-      },
-    });
+    const cart = await prismaClient.item.findMany({ where: { cart_id: cart_id }, include: { product: true, cart: true } });
 
     return cart;
   }

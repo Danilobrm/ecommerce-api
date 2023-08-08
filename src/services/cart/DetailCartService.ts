@@ -6,15 +6,7 @@ interface DetailRequest {
 
 class DetailCartService {
   async execute({ cart_id }: DetailRequest) {
-    const cart = await prismaClient.item.findMany({
-      where: {
-        cart_id: cart_id,
-      },
-      include: {
-        product: true,
-        cart: true,
-      },
-    });
+    const cart = await prismaClient.item.findMany({ where: { cart_id: cart_id }, include: { product: true, cart: true } });
 
     return cart;
   }
