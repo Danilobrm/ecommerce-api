@@ -10,9 +10,7 @@ interface IUserAuthData {
 export class AuthUserService {
   async execute({ email, password }: IUserAuthData) {
     const secretOrPrivateKey = process.env.JWT_SECRET;
-    if (!secretOrPrivateKey) {
-      return null;
-    }
+    if (!secretOrPrivateKey) return null;
 
     const user = await emailValidatorDatabase.validate(email);
     if (!user) return null;
@@ -21,22 +19,8 @@ export class AuthUserService {
     if (!passwordMatch) return null;
 
     // gerar token para o usuario
-    const token = sign(
-      { name: user.name, email: user.email },
-      secretOrPrivateKey,
-      {
-        subject: user.id,
-        expiresIn: '30d',
-      },
-    );
+    const token = sign({ name: user.name, email: user.email }, secretOrPrivateKey, { subject: user.id, expiresIn: '30d' });
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        token: token,
-      },
-    };
+    return { user: { id: user.id, name: user.name, email: user.email, token: token } };
   }
 }
