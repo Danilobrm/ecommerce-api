@@ -4,25 +4,11 @@ import { prismaMock } from '../../../../singleton';
 
 class MockCreateProductController {
   async create(req: Request, res: Response) {
-    const { name, price, description, category_id } = req.body;
+    if (!req.file) return res.status(400).json('error upload file');
+    const { filename: banner } = req.file;
 
     const createProductService = new MockCreateProductService();
-
-    if (!req.file) {
-      throw new Error('error upload file');
-    }
-
-    // const { originalname, filename: banner } = req.file;
-
-    const banner = 'opa';
-
-    const product = await createProductService.execute({
-      name,
-      price,
-      description,
-      banner,
-      category_id,
-    });
+    const product = await createProductService.execute({ ...req.body, banner });
 
     return res.json(product);
   }
@@ -36,22 +22,9 @@ interface ProductRequest {
   category_id: string;
 }
 class MockCreateProductService {
-  async execute({
-    name,
-    price,
-    description,
-    banner,
-    category_id,
-  }: ProductRequest) {
-    const product = await prismaClient.product.create({
-      data: {
-        name: name,
-        price: price,
-        description: description,
-        banner: banner,
-        category_id: category_id,
-      },
-    });
+  async execute({ name, price, description, banner, category_id }: ProductRequest) {
+    const product = await prismaClient.product.create({ data: { name, price, description, banner, category_id } });
+
     return product;
   }
 }
@@ -127,7 +100,6 @@ const mockRequest = {
 } as unknown as Request;
 
 const mockResponse = {} as unknown as Response;
-mockResponse.json = (data: Request): Response =>
-  JSON.stringify(data) as unknown as Response;
+mockResponse.json = (data: Request): Response => JSON.stringify(data) as unknown as Response;
 
 export const mockDate = new Date() as Date;
