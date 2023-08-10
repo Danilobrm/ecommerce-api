@@ -4,11 +4,7 @@ import { emailValidator } from '../../fields/emailValidator';
 import { NextFunction, Request, Response } from 'express';
 
 export class ValidateUserRegister {
-  async validate(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void | Response> {
+  async validate(req: Request, res: Response, next: NextFunction): Promise<void | Response> {
     const { name, email, password } = req.body;
 
     // validate data
