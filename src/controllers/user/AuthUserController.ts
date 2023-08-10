@@ -4,10 +4,10 @@ import { AuthUserService } from '../../services/user/AuthUserService';
 
 export class AuthUserController implements AuthenticateRequest {
   async authenticate(req: Request, res: Response): Promise<Response> {
-    const { email, password } = req.body;
+    const { name, email, id } = req.body;
 
     const authUserService = new AuthUserService();
-    const auth = await authUserService.execute({ email, password });
+    const auth = await authUserService.authenticate({ id, name, email });
 
     return res.json(auth);
   }
