@@ -5,6 +5,7 @@ import { DetailCartService } from '../../services/cart/DetailCartService';
 class RemoveItemController {
   async remove(req: Request, res: Response, next: NextFunction) {
     const item_id = req.query.item_id as string;
+    if (!item_id) return res.status(400).json('Produto não existe.');
 
     const removeItemService = new RemoveItemService();
     const item = await removeItemService.execute({ item_id });
@@ -14,7 +15,7 @@ class RemoveItemController {
     const cart = await detailCartService.execute({ cart_id });
 
     if (cart.length > 0) return res.json(item);
-    req.cart_id = item.cart_id;
+    req.query.cart_id = item.cart_id;
 
     next();
   }
