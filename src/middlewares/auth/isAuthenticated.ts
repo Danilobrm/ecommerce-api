@@ -11,7 +11,7 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
 
   // receber o token
   const authToken = req.headers.authorization;
-  if (!authToken) return res.status(401).end();
+  if (!authToken) return res.status(401).json('Usuário precisa estar logado.');
 
   const [, token] = authToken.split(' ');
 

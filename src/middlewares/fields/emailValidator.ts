@@ -1,42 +1,22 @@
 import isEmail from 'validator/lib/isEmail';
 import { Validator } from '../../interfaces/validate/validate';
-import prismaClient from '../../prisma';
-import { User } from '@prisma/client';
+import { QueryUserService } from '../../services/user/QueryUserService';
 
-export class EmailValidator implements Validator<string, Promise<string>> {
-  async validate(email: string): Promise<string> {
+interface RequestData {
+  email: string;
+}
+
+export class EmailValidator implements Validator<RequestData, Promise<string>> {
+  async validate({ email }: RequestData): Promise<string> {
     // empty field
-    if (!email) {
-      return 'campo email não pode ficar vazio.';
-    }
-    if (!isEmail(email)) {
-      return 'email inválido.';
-    }
+    if (!email) return 'campo email não pode ficar vazio.';
 
-    const emailValidatorDatabase = new EmailValidatorDatabase();
-    const userAlreadyExists = await emailValidatorDatabase.validate(email);
+    if (!isEmail(email)) return 'email inválido.';
 
-    if (userAlreadyExists) {
-      return 'o email informado já está em uso.';
-    }
+    const emailValidatorDatabase = new QueryUserService();
+    const userAlreadyExists = await emailValidatorDatabase.queryUserByEmail({ email });
+    if (userAlreadyExists) return 'o email informado já está em uso.';
 
     return '';
   }
 }
-
-export class EmailValidatorDatabase {
-  async validate(email: string): Promise<User | null> {
-    const userAlreadyExists = await prismaClient.user.findFirst({
-      where: {
-        email: email,
-      },
-    });
-
-    return userAlreadyExists;
-  }
-}
-
-const emailValidatorDatabase = new EmailValidatorDatabase();
-const emailValidator: Validator<string, Promise<string>> = new EmailValidator();
-
-export { emailValidator, emailValidatorDatabase };
