@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
-import { AuthenticateRequest } from '../../interfaces/user/controllers/authUserControllerProtocol';
 import { AuthUserService } from '../../services/user/AuthUserService';
+
+export interface AuthenticateRequest {
+  authenticate(req: Request, res: Response): Promise<Response>;
+}
 
 export class AuthUserController implements AuthenticateRequest {
   async authenticate(req: Request, res: Response): Promise<Response> {
