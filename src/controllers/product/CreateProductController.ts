@@ -7,7 +7,7 @@ class CreateProductController {
     const { filename: banner } = req.file;
 
     const createProductService = new CreateProductService();
-    const product = await createProductService.execute({ ...req.body, banner });
+    const product = await createProductService.create({ ...req.body, banner });
 
     return res.json(product);
   }
