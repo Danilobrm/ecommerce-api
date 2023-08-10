@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticateService } from '../../../interfaces/services';
 import { sign } from 'jsonwebtoken';
 
 interface Dependencies {
@@ -50,6 +49,10 @@ describe('test authenticate user generate JWT token', () => {
     expect(authenticate).toEqual(JSON.stringify('Invalid secret or private key'));
   });
 });
+
+export interface AuthenticateRequest {
+  authenticate(req: Request, res: Response): Promise<Response>;
+}
 
 export class MockAuthUserController implements AuthenticateRequest {
   async authenticate(req: Request, res: Response): Promise<Response> {
