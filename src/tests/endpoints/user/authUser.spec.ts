@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { AuthenticateRequest } from '../../../interfaces/user/controllers/authUserControllerProtocol';
 import { AuthenticateService } from '../../../interfaces/services';
 import { sign } from 'jsonwebtoken';
 
