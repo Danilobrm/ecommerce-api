@@ -3,6 +3,54 @@ import { CreateRequest } from '../../../../interfaces/controllers/CRUD';
 import { prismaMock } from '../../../../singleton';
 import prismaClient from '../../../../prisma';
 import { hash } from 'bcryptjs';
+import { CreateRequestService } from '../../../../interfaces/services';
+
+interface Dependencies {
+  mockRequest: Request;
+  mockResponse: Response;
+}
+
+describe('user create account test', () => {
+  const _dependencies: Dependencies = {
+    mockRequest: { body: { name: 'teste', email: 'teste@email.com', password: '12345678' } } as unknown as Request,
+    mockResponse: {
+      json: jest.fn((response: ResponseData) => JSON.stringify(response)),
+      status: jest.fn((status: number) => status),
+    } as unknown as Response,
+  };
+
+  it('should be called once', async () => {
+    const sut = new MockCreateUserController();
+    const spy = jest.spyOn(sut, 'create');
+
+    await sut.create(_dependencies.mockRequest, _dependencies.mockResponse);
+
+    expect(spy).toBeCalledTimes(1);
+  });
+
+  it('should return a user json made with res.json', async () => {
+    const mockRequest = { body: { name: 'teste', email: 'teste@email.com', password: '12345678' } } as Request;
+
+    const mockResolvedValue = { id: '1', ...mockRequest.body, created_at: mockDate, updated_at: mockDate };
+    prismaMock.user.create.mockResolvedValue(mockResolvedValue);
+
+    const sut = new MockCreateUserController();
+    const response = await sut.create(_dependencies.mockRequest, _dependencies.mockResponse);
+    expect(response).toEqual(JSON.stringify(mockResolvedValue));
+  });
+
+  it('should return a user object created from the database', async () => {
+    const mockRequest = { body: { name: 'teste', email: 'teste@email.com', password: '12345678' } } as Request;
+
+    const mockResolvedValue = { id: '1', ...mockRequest.body, created_at: mockDate, updated_at: mockDate };
+    prismaMock.user.create.mockResolvedValue(mockResolvedValue);
+
+    const sut = new MockCreateUserService();
+    const response = await sut.create(_dependencies.mockRequest.body);
+
+    expect(response).toEqual(mockResolvedValue);
+  });
+});
 
 class MockCreateUserController implements CreateRequest {
   async create(req: Request, res: Response): Promise<Response> {
@@ -10,85 +58,33 @@ class MockCreateUserController implements CreateRequest {
     const passwordHash = await hash(password, 8);
 
     const createUserService = new MockCreateUserService();
-    const user = await createUserService.execute({ name, email, password: passwordHash });
+    const user = await createUserService.create({ name, email, password: passwordHash });
 
     return res.json(user);
   }
 }
 
-export interface IUserCreateData {
+interface RequestData {
   name: string;
   email: string;
   password: string;
 }
 
-export class MockCreateUserService {
-  async execute({ name, email, password }: IUserCreateData) {
-    const response = await prismaClient.user.create({
-      data: {
-        name: name,
-        email: email,
-        password: password,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+interface ResponseData {
+  id: string;
+  name: string;
+  email: string;
+}
+
+class MockCreateUserService implements CreateRequestService<RequestData, ResponseData> {
+  async create({ name, email, password }: RequestData): Promise<ResponseData> {
+    const user = await prismaClient.user.create({
+      data: { name: name, email: email, password: password },
+      select: { id: true, name: true, email: true },
     });
 
-    return response;
+    return user;
   }
 }
 
-const createSut = () => {
-  return new MockCreateUserController();
-};
-
-describe('user create account', () => {
-  const sut = createSut();
-  it('should call the function once', () => {
-    const spy = jest.spyOn(sut, 'create');
-
-    sut.create(mockRequest, mockResponse);
-
-    expect(spy).toBeCalledTimes(1);
-  });
-
-  it('should return a user created json', async () => {
-    prismaMock.user.create.mockResolvedValue({
-      id: '1',
-      name: 'test',
-      email: 'test@example.com',
-      password: '12345678',
-      created_at: mockDate,
-      updated_at: mockDate,
-    });
-
-    await expect(sut.create(mockRequest, mockResponse)).resolves.toEqual(
-      JSON.stringify({
-        user: {
-          id: '1',
-          name: 'test',
-          email: 'test@example.com',
-          password: '12345678',
-          created_at: mockDate,
-          updated_at: mockDate,
-        },
-      }),
-    );
-  });
-});
-
 export const mockDate = new Date() as Date;
-
-const mockRequest = {
-  body: {
-    name: 'test',
-    email: 'test@example.com',
-    password: '12345678',
-  },
-} as unknown as Request;
-
-const mockResponse = {} as unknown as Response;
-mockResponse.json = (data: Request): Response => JSON.stringify(data) as unknown as Response;
