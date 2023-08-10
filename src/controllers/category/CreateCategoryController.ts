@@ -8,7 +8,7 @@ class CreateCategoryController implements CreateRequest {
     if (!name) res.status(400).json('Categoria precisa de um nome!');
 
     const createCategoryService = new CreateCategoryService();
-    const category = await createCategoryService.execute({ name });
+    const category = await createCategoryService.create({ name });
 
     return res.json(category);
   }
