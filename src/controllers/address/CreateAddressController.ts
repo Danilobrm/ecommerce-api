@@ -7,7 +7,7 @@ export class CreateAddressController implements CreateRequest {
     const user_id = req.user_id;
 
     const createAddressRepository = new CreateAddressService();
-    const address = await createAddressRepository.execute({ ...req.body, user: { connect: { id: user_id } } });
+    const address = await createAddressRepository.create({ ...req.body, user: { connect: { id: user_id } } });
 
     return res.json(address);
   }

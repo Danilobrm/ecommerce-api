@@ -1,18 +1,18 @@
+import { Item } from '@prisma/client';
+import { CreateRequestService } from '../../interfaces/services';
 import prismaClient from '../../prisma';
 
-interface ItemRequest {
+interface RequestData {
   cart_id: string;
   product_id: string;
   amount: number;
 }
 
-class AddItemService {
-  async execute({ cart_id, product_id, amount }: ItemRequest) {
-    const cart = await prismaClient.item.create({
-      data: { cart_id: cart_id, product_id: product_id, amount: amount },
-    });
+class AddItemService implements CreateRequestService<RequestData, Item> {
+  async create({ cart_id, product_id, amount }: RequestData): Promise<Item> {
+    const item = await prismaClient.item.create({ data: { cart_id, product_id, amount } });
 
-    return cart;
+    return item;
   }
 }
 

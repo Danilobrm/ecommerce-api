@@ -1,26 +1,28 @@
-import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { emailValidatorDatabase } from '../../middlewares/fields/emailValidator';
+import { AuthenticateService } from '../../interfaces/services';
 
-interface AuthenticateRequest {
+interface RequestData {
+  id: string;
+  name: string;
   email: string;
-  password: string;
 }
 
-export class AuthUserService {
-  async authenticate({ email, password }: AuthenticateRequest) {
+interface ResponseData {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+}
+
+export class AuthUserService implements AuthenticateService<RequestData, ResponseData | ResponseData | string> {
+  async authenticate(data: RequestData): Promise<ResponseData | string> {
+    const { name, email, id } = data;
     const secretOrPrivateKey = process.env.JWT_SECRET;
-    if (!secretOrPrivateKey) return;
-
-    const user = await emailValidatorDatabase.validate(email);
-    if (!user) return;
-
-    const passwordMatch = await compare(password, user.password);
-    if (!passwordMatch) return;
+    if (!secretOrPrivateKey) return 'Invalid secret or private key';
 
     // gerar token para o usuario
-    const token = sign({ name: user.name, email: user.email }, secretOrPrivateKey, { subject: user.id, expiresIn: '30d' });
+    const token = sign({ name: name, email: email }, secretOrPrivateKey, { subject: id, expiresIn: '30d' });
 
-    return { id: user.id, name: user.name, email: user.email, token: token };
+    return { ...data, token: token };
   }
 }

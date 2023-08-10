@@ -1,12 +1,21 @@
+import { Address } from '@prisma/client';
+import { CreateRequestService } from '../../interfaces/services';
 import prismaClient from '../../prisma';
-import { AddressData } from '../../interfaces/address/services/createAddressServiceProtocol';
 
-export class CreateAddressService {
-  async execute(data: AddressData) {
-    const response = await prismaClient.address.create({
-      data: data,
-      select: { street: true, number: true, city: true, district: true, postal_code: true, user_id: true },
-    });
+interface RequestData {
+  street: string;
+  number: string;
+  complement?: string;
+  district: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  user: { connect: { id: string } };
+}
+
+export class CreateAddressService implements CreateRequestService<RequestData, Address> {
+  async create(data: RequestData): Promise<Address> {
+    const response = await prismaClient.address.create({ data: data });
 
     return response;
   }

@@ -6,7 +6,7 @@ class AddItemController {
     const { cart_id, product_id, amount } = req.body;
 
     const addItem = new AddItemService();
-    const cart = await addItem.execute({ cart_id, product_id, amount });
+    const cart = await addItem.create({ cart_id, product_id, amount });
 
     return res.json(cart);
   }
