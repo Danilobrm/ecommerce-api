@@ -1,16 +1,16 @@
-import { passwordValidator } from '../../fields/passwordValidator';
-import { nameValidator } from '../../fields/nameValidator';
-import { emailValidator } from '../../fields/emailValidator';
 import { NextFunction, Request, Response } from 'express';
+import { EmailValidator } from '../../fields/emailValidator';
+import { NameValidator } from '../../fields/nameValidator';
+import { PasswordValidator } from '../../fields/passwordValidator';
 
 export class ValidateUserRegister {
   async validate(req: Request, res: Response, next: NextFunction): Promise<void | Response> {
     const { name, email, password } = req.body;
 
     // validate data
-    const nameErrors = nameValidator.validate(name);
-    const emailErrors = await emailValidator.validate(email);
-    const passwordErrors = passwordValidator.validate(password);
+    const emailErrors = await new EmailValidator().validate(name);
+    const nameErrors = new NameValidator().validate(email);
+    const passwordErrors = new PasswordValidator().validate(password);
 
     //get the returned list of erros
     const validationErrors: { [key: string]: string } = {};

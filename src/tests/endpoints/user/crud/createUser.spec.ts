@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import { CreateRequest } from '../../../../interfaces/controllers/CRUD';
 import { prismaMock } from '../../../../singleton';
-import prismaClient from '../../../../prisma';
 import { hash } from 'bcryptjs';
-import { CreateRequestService } from '../../../../interfaces/services';
+import { CreateUserService } from '../../../../services/user/CreateUserService';
 
 interface Dependencies {
   mockRequest: Request;
@@ -11,14 +10,6 @@ interface Dependencies {
 }
 
 describe('user create account test', () => {
-  const _dependencies: Dependencies = {
-    mockRequest: { body: { name: 'teste', email: 'teste@email.com', password: '12345678' } } as unknown as Request,
-    mockResponse: {
-      json: jest.fn((response: ResponseData) => JSON.stringify(response)),
-      status: jest.fn((status: number) => status),
-    } as unknown as Response,
-  };
-
   it('should be called once', async () => {
     const sut = new MockCreateUserController();
     const spy = jest.spyOn(sut, 'create');
@@ -45,7 +36,7 @@ describe('user create account test', () => {
     const mockResolvedValue = { id: '1', ...mockRequest.body, created_at: mockDate, updated_at: mockDate };
     prismaMock.user.create.mockResolvedValue(mockResolvedValue);
 
-    const sut = new MockCreateUserService();
+    const sut = new CreateUserService();
     const response = await sut.create(_dependencies.mockRequest.body);
 
     expect(response).toEqual(mockResolvedValue);
@@ -57,17 +48,11 @@ class MockCreateUserController implements CreateRequest {
     const { name, email, password } = req.body;
     const passwordHash = await hash(password, 8);
 
-    const createUserService = new MockCreateUserService();
+    const createUserService = new CreateUserService();
     const user = await createUserService.create({ name, email, password: passwordHash });
 
     return res.json(user);
   }
-}
-
-interface RequestData {
-  name: string;
-  email: string;
-  password: string;
 }
 
 interface ResponseData {
@@ -76,15 +61,12 @@ interface ResponseData {
   email: string;
 }
 
-class MockCreateUserService implements CreateRequestService<RequestData, ResponseData> {
-  async create({ name, email, password }: RequestData): Promise<ResponseData> {
-    const user = await prismaClient.user.create({
-      data: { name: name, email: email, password: password },
-      select: { id: true, name: true, email: true },
-    });
+const _dependencies: Dependencies = {
+  mockRequest: { body: { name: 'teste', email: 'teste@email.com', password: '12345678' } } as unknown as Request,
+  mockResponse: {
+    json: jest.fn((response: ResponseData) => JSON.stringify(response)),
+    status: jest.fn((status: number) => status),
+  } as unknown as Response,
+};
 
-    return user;
-  }
-}
-
-export const mockDate = new Date() as Date;
+const mockDate = new Date() as Date;

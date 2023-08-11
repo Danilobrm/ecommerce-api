@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import prismaClient from '../../prisma';
 import { prismaMock } from '../../singleton';
-import { CreateRequestService } from '../../interfaces/services';
 import { Cart, User } from '@prisma/client';
+import { CheckUserCart } from '../../middlewares/crud/validation/CheckUserCart';
 
 interface Dependencies {
   mockRequest: Request;
@@ -11,22 +10,8 @@ interface Dependencies {
 }
 
 describe('test create cart middleware', () => {
-  const _dependencies: Dependencies = {
-    mockRequest: {
-      user_id: 'userid',
-      body: {
-        cart_id: '',
-      },
-    } as unknown as Request,
-    mockResponse: {
-      json: jest.fn((response: Cart) => JSON.stringify(response)),
-      status: jest.fn((status: number) => status),
-    } as unknown as Response,
-    mockNext: jest.fn(),
-  };
-
   it('should be called once', async () => {
-    const sut = new MockUserHaveCart();
+    const sut = new CheckUserCart();
     const spy = jest.spyOn(sut, 'check');
 
     prismaMock.cart.create.mockResolvedValue({
@@ -44,7 +29,8 @@ describe('test create cart middleware', () => {
   });
 
   it('should create cart and call next function', async () => {
-    const sut = new MockUserHaveCart();
+    _dependencies.mockRequest.body.cart_id = '';
+    const sut = new CheckUserCart();
 
     prismaMock.cart.create.mockResolvedValue({
       id: 'cartid',
@@ -61,7 +47,7 @@ describe('test create cart middleware', () => {
   });
 
   it('should call next if already exists a cart', async () => {
-    const sut = new MockUserHaveCart();
+    const sut = new CheckUserCart();
 
     const mockResolvedValue = {
       cart: {
@@ -87,33 +73,16 @@ describe('test create cart middleware', () => {
   });
 });
 
-export class MockUserHaveCart {
-  async check(req: Request, res: Response, next: NextFunction) {
-    const user_id = req.user_id;
-
-    // Check if a cart exists for the user
-    const user = await prismaClient.user.findUnique({ where: { id: user_id }, include: { cart: true } });
-
-    if (!user?.cart) {
-      const createCartService = new MockCreateCartService();
-      const cart = await createCartService.create({ user_id });
-      req.body.cart_id = cart.id;
-      next();
-    }
-
-    req.body.cart_id = user?.cart?.id;
-    next();
-  }
-}
-
-interface OrderRequest {
-  user_id: string;
-}
-
-class MockCreateCartService implements CreateRequestService<OrderRequest> {
-  async create({ user_id }: OrderRequest): Promise<Cart> {
-    const cart = await prismaClient.cart.create({ data: { user: { connect: { id: user_id } } } });
-
-    return cart;
-  }
-}
+const _dependencies: Dependencies = {
+  mockRequest: {
+    user_id: 'userid',
+    body: {
+      cart_id: '',
+    },
+  } as unknown as Request,
+  mockResponse: {
+    json: jest.fn((response: Cart) => JSON.stringify(response)),
+    status: jest.fn((status: number) => status),
+  } as unknown as Response,
+  mockNext: jest.fn(),
+};
