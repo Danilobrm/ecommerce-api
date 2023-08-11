@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { QueryRequestService } from '../../../../interfaces/services';
 import { User } from '@prisma/client';
 import { prismaMock } from '../../../../singleton';
-import prismaClient from '../../../../prisma';
+import { ValidateUserAuthentication } from '../../../../middlewares/auth/validation/validateUserAuthentication';
 
 interface Dependencies {
   mockRequest: Request;
@@ -11,22 +10,8 @@ interface Dependencies {
 }
 
 describe('test validateUserAuthentication', () => {
-  const _dependencies: Dependencies = {
-    mockRequest: {
-      body: {
-        email: 'teste@email.com',
-        password: '12345678',
-      },
-    } as unknown as Request,
-    mockResponse: {
-      json: jest.fn((response: User) => JSON.stringify(response)),
-      status: jest.fn((status: number) => status),
-    } as unknown as Response,
-    mockNext: jest.fn(),
-  };
-
   it('should be called once', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
     const spy = jest.spyOn(sut, 'validate');
 
     await sut.validate(_dependencies.mockRequest, _dependencies.mockResponse, _dependencies.mockNext);
@@ -35,7 +20,7 @@ describe('test validateUserAuthentication', () => {
   });
 
   it('should define req.body.id/req.body.name and call next function', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
 
     const mockResolvedValue = {
       id: 'userid',
@@ -54,7 +39,7 @@ describe('test validateUserAuthentication', () => {
   });
 
   it('should return email error if no email was provided', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
 
     _dependencies.mockRequest.body.email = '';
     _dependencies.mockRequest.body.password = '12345678';
@@ -66,7 +51,7 @@ describe('test validateUserAuthentication', () => {
   });
 
   it('should return password error if no password was provided', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
 
     _dependencies.mockRequest.body.email = 'teste@email.com';
     _dependencies.mockRequest.body.password = '';
@@ -78,7 +63,7 @@ describe('test validateUserAuthentication', () => {
   });
 
   it('should return email error if no user was found', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
 
     _dependencies.mockRequest.body.email = 'notfoundemail@email.com';
     _dependencies.mockRequest.body.password = '12345678';
@@ -95,7 +80,7 @@ describe('test validateUserAuthentication', () => {
   });
 
   it('should return password error if the password dont match databases password', async () => {
-    const sut = new MockValidateUserAuthentication();
+    const sut = new ValidateUserAuthentication();
 
     _dependencies.mockRequest.body.email = 'teste@email.com';
     _dependencies.mockRequest.body.password = '12345678';
@@ -121,51 +106,22 @@ describe('test validateUserAuthentication', () => {
   });
 });
 
-export class MockValidateUserAuthentication {
-  async validate(req: Request, res: Response, next: NextFunction) {
-    const { email, password } = req.body;
-    if (!email)
-      return res.json({
-        status: 400,
-        response: { email: 'Email inválido.' },
-      });
-    if (!password)
-      return res.json({
-        status: 400,
-        response: { password: 'Senha inválida.' },
-      });
-
-    const queryUser = new MockQueryUserService();
-    const user = await queryUser.queryUserByEmail(email);
-    if (!user)
-      return res.json({
-        status: 400,
-        response: { email: 'Usuário não encontrado.' },
-      });
-
-    const passwordMatch = password === user.password;
-    if (!passwordMatch)
-      return res.json({
-        status: 400,
-        response: { password: 'Senha incorreta.' },
-      });
-
-    req.body.name = user.name;
-    req.body.id = user.id;
-    next();
-  }
-}
-
-interface QueryRequest {
-  email: string;
-}
-
-export class MockQueryUserService implements QueryRequestService<QueryRequest, User | null> {
-  async queryUserByEmail({ email }: QueryRequest): Promise<User | null> {
-    const userAlreadyExists = await prismaClient.user.findFirst({ where: { email: email } });
-
-    return userAlreadyExists;
-  }
-}
+const _dependencies: Dependencies = {
+  mockRequest: {
+    body: {
+      email: 'teste@email.com',
+      password: '12345678',
+    },
+  } as unknown as Request,
+  mockResponse: {
+    status: function (status: number) {
+      return status;
+    },
+    json: function (body: User) {
+      return body;
+    },
+  } as unknown as Response,
+  mockNext: jest.fn(),
+};
 
 const mockDate = new Date() as Date;
