@@ -11,7 +11,3 @@ export class PasswordValidator implements Validator<string, string> {
     return '';
   }
 }
-
-const passwordValidator: Validator<string, string> = new PasswordValidator();
-
-export { passwordValidator };

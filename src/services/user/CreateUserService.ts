@@ -19,7 +19,7 @@ export class CreateUserService implements CreateRequestService<RequestData, Resp
       data: { name: name, email: email, password: password },
       select: { id: true, name: true, email: true },
     });
-    console.log(user);
+
     return user;
   }
 }

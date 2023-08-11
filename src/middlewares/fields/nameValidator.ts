@@ -11,7 +11,3 @@ export class NameValidator implements Validator<string, string> {
     return '';
   }
 }
-
-const nameValidator: Validator<string, string> = new NameValidator();
-
-export { nameValidator };
